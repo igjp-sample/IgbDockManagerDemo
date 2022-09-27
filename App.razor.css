@@ -1,0 +1,15 @@
+﻿.container {
+    margin-top: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+    .container [slot] {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
