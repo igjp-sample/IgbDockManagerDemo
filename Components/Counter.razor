@@ -1,0 +1,17 @@
+﻿<div>
+    <p>Current Count: @_Count</p>
+    <p>
+        <IgbButton Variant="ButtonVariant.Outlined" @onclick="OnClickIncrement">
+            Increment
+        </IgbButton>
+    </p>
+</div>
+
+@code {
+    private int _Count = 0;
+
+    private void OnClickIncrement()
+    {
+        _Count++;
+    }
+}
