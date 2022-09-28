@@ -9,6 +9,12 @@
             <DynamicComponent Type="typeOfComponent" Parameters="descriptor.Parameters" />
         </div>
     }
+
+    <!-- "Counter" コンポーネントを追加するボタン -->
+    <div class="container">
+        <IgbButton @onclick="OnClickAddCounter">Add Counter</IgbButton>
+    </div>
+
 </div>
 
 @code {
@@ -27,4 +33,13 @@
     /// "画面上にどのコンポーネントが表示されているか" を保持するリスト
     /// </summary>
     private readonly List<ComponentDescriptor> _Components = new();
+
+    /// <summary>
+    /// "Add Counter" ボタンがクリックされたときに呼び出されます。
+    /// </summary>
+    private void OnClickAddCounter()
+    {
+        var id = Guid.NewGuid().ToString();
+        this._Components.Add(new(id, nameof(Counter), new()));
+    }
 }
