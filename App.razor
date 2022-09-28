@@ -15,6 +15,13 @@
         <IgbButton @onclick="OnClickAddCounter">Add Counter</IgbButton>
     </div>
 
+    <!-- "TextMessage" コンポーネントに表示するメッセージの入力欄と追加するボタン -->
+    <div class="container">
+        <IgbInput @bind-Value="this._Message" InputOcurred="@(e => this._Message = e.Detail)" />
+        <div class="container">
+            <IgbButton @onclick="OnClickAddTextMessage" Disabled="@(this._Message == "")">Add TextMessage</IgbButton>
+        </div>
+    </div>
 </div>
 
 @code {
@@ -41,5 +48,26 @@
     {
         var id = Guid.NewGuid().ToString();
         this._Components.Add(new(id, nameof(Counter), new()));
+    }
+
+    /// <summary>
+    /// テキスト入力欄にバインドするフィールド変数
+    /// </summary>
+    private string _Message = "";
+
+    /// <summary>
+    /// "Add TextMessage" ボタンがクリックされたときに呼び出されます。
+    /// </summary>
+    private void OnClickAddTextMessage()
+    {
+        var id = Guid.NewGuid().ToString();
+        this._Components.Add(new(id, nameof(TextMessage), new()
+            {
+                // ページ上の入力欄に入力されたテキストを、辞書の一項目として追加して渡す
+                [nameof(TextMessage.Message)] = this._Message
+            }));
+
+        // 1つ TextMessage コンポーネントを追加したら、入力欄はクリアしておく
+        this._Message = "";
     }
 }
