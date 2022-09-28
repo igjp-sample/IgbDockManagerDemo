@@ -1,1 +1,17 @@
-﻿
+﻿@code {
+
+    /// <summary>
+    /// コンポーネント名文字列から、実際のコンポーネントの型 (`Type`) を表引きするための辞書
+    /// </summary>
+    private static readonly IReadOnlyDictionary<string, Type> _ComponentNameToType =
+        new Dictionary<string, Type>
+            {
+                [nameof(Counter)] = typeof(Counter),
+                [nameof(TextMessage)] = typeof(TextMessage),
+            };
+
+    /// <summary>
+    /// "画面上にどのコンポーネントが表示されているか" を保持するリスト
+    /// </summary>
+    private readonly List<ComponentDescriptor> _Components = new();
+}
