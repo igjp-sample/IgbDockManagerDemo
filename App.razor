@@ -1,4 +1,17 @@
-﻿@code {
+﻿<div class="container">
+
+    @foreach (var descriptor in this._Components)
+    {
+        // デスクリプタで指定されたコンポーネント名から、対応するコンポーネントの型を表引き
+        var typeOfComponent = _ComponentNameToType[descriptor.ComponentName];
+
+        <div @key="descriptor.Id">
+            <DynamicComponent Type="typeOfComponent" Parameters="descriptor.Parameters" />
+        </div>
+    }
+</div>
+
+@code {
 
     /// <summary>
     /// コンポーネント名文字列から、実際のコンポーネントの型 (`Type`) を表引きするための辞書
