@@ -1,4 +1,7 @@
-﻿<div class="container">
+﻿@using Blazored.LocalStorage
+@inject ILocalStorageService LocalStorage
+
+<div class="container">
 
     @foreach (var descriptor in this._Components)
     {
@@ -42,12 +45,26 @@
     private readonly List<ComponentDescriptor> _Components = new();
 
     /// <summary>
+    /// 描画が完了するたびに呼び出されます (以降、ローカルストレージへのアクセスが可能になります)
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // ブラウザのローカルストレージに JSON 形式で保存しておいた表示コンポーネントの情報を、逆シリアル化して復元
+            var components = await this.LocalStorage.GetItemAsync<ComponentDescriptor[]>("components");
+            if (components != null) this._Components.AddRange(components);
+            this.StateHasChanged();
+        }
+    }
+
+    /// <summary>
     /// "Add Counter" ボタンがクリックされたときに呼び出されます。
     /// </summary>
-    private void OnClickAddCounter()
+    private async Task OnClickAddCounter()
     {
         var id = Guid.NewGuid().ToString();
-        this._Components.Add(new(id, nameof(Counter), new()));
+        await this.AddComponentAsync(new(id, nameof(Counter), new()));
     }
 
     /// <summary>
@@ -58,10 +75,10 @@
     /// <summary>
     /// "Add TextMessage" ボタンがクリックされたときに呼び出されます。
     /// </summary>
-    private void OnClickAddTextMessage()
+    private async Task OnClickAddTextMessage()
     {
         var id = Guid.NewGuid().ToString();
-        this._Components.Add(new(id, nameof(TextMessage), new()
+        await this.AddComponentAsync(new(id, nameof(TextMessage), new()
             {
                 // ページ上の入力欄に入力されたテキストを、辞書の一項目として追加して渡す
                 [nameof(TextMessage.Message)] = this._Message
@@ -69,5 +86,16 @@
 
         // 1つ TextMessage コンポーネントを追加したら、入力欄はクリアしておく
         this._Message = "";
+    }
+
+    /// <summary>
+    /// 表示コンポーネントの追加処理を集約します。
+    /// </summary>
+    private async ValueTask AddComponentAsync(ComponentDescriptor descriptor)
+    {
+        this._Components.Add(descriptor);
+
+        // 表示コンポーネントの情報を、ブラウザのローカルストレージに保存
+        await this.LocalStorage.SetItemAsync("components", this._Components);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace IgbDockManagerDemo;
+﻿using Toolbelt.Text.Json.Serialization;
+
+namespace IgbDockManagerDemo;
 
 /// <summary>
 /// "画面上に表示されているコンポーネント" の 1 つ 1 つを表すレコードクラス
@@ -10,6 +12,7 @@ public record ComponentDescriptor
 (
     string Id,
     string ComponentName,
+    [property: DictionaryStringObjectJsonConverter]
     Dictionary<string, object?> Parameters
 );
 
