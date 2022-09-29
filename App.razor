@@ -1,17 +1,22 @@
 ﻿@using Blazored.LocalStorage
+@using IgbDockManagerDemo.Services
 @inject ILocalStorageService LocalStorage
+@inject DockManagerHelper Helper
 
 <div class="container">
 
-    @foreach (var descriptor in this._Components)
-    {
-        // デスクリプタで指定されたコンポーネント名から、対応するコンポーネントの型を表引き
-        var typeOfComponent = _ComponentNameToType[descriptor.ComponentName];
+    <!-- ドックマネージャー -->
+    <IgbDockManager id="dockmanager1" Layout="this._InitialLayout" Width="800px" Height="400px">
+        @foreach (var descriptor in this._Components)
+        {
+            // デスクリプタで指定されたコンポーネント名から、対応するコンポーネントの型を表引き
+            var typeOfComponent = _ComponentNameToType[descriptor.ComponentName];
 
-        <div @key="descriptor.Id">
-            <DynamicComponent Type="typeOfComponent" Parameters="descriptor.Parameters" />
-        </div>
-    }
+            <div @key="descriptor.Id" slot="@descriptor.Id">
+                <DynamicComponent Type="typeOfComponent" Parameters="descriptor.Parameters" />
+            </div>
+        }
+    </IgbDockManager>
 
     <!-- "Counter" コンポーネントを追加するボタン -->
     <div class="container">
@@ -43,6 +48,21 @@
     /// "画面上にどのコンポーネントが表示されているか" を保持するリスト
     /// </summary>
     private readonly List<ComponentDescriptor> _Components = new();
+
+#pragma warning disable BL0005
+    /// <summary>
+    /// ドックマネージャーの初期レイアウト
+    /// </summary>
+    private readonly IgbDockManagerLayout _InitialLayout = new IgbDockManagerLayout()
+        {
+            RootPane = new IgbSplitPane
+            {
+                PaneType = DockManagerPaneType.SplitPane,
+                Orientation = SplitPaneOrientation.Horizontal,
+                Panes = new IgbDockManagerPaneCollection()
+            }
+        };
+#pragma warning restore BL0005
 
     /// <summary>
     /// 描画が完了するたびに呼び出されます (以降、ローカルストレージへのアクセスが可能になります)
@@ -94,6 +114,9 @@
     private async ValueTask AddComponentAsync(ComponentDescriptor descriptor)
     {
         this._Components.Add(descriptor);
+
+        // ドックマネージャーに、追加した表示コンポーネントを取り付け
+        await this.Helper.AttachContentPaneAsync("#dockmanager1", descriptor.Id, descriptor.ComponentName);
 
         // 表示コンポーネントの情報を、ブラウザのローカルストレージに保存
         await this.LocalStorage.SetItemAsync("components", this._Components);
