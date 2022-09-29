@@ -1,5 +1,6 @@
 ﻿@using Blazored.LocalStorage
 @using IgbDockManagerDemo.Services
+@implements IAsyncDisposable
 @inject ILocalStorageService LocalStorage
 @inject DockManagerHelper Helper
 
@@ -65,6 +66,11 @@
 #pragma warning restore BL0005
 
     /// <summary>
+    /// 最後に購読破棄するために、ドックマネージャーのイベント購読を保持するリスト
+    /// </summary>
+    private readonly List<IAsyncDisposable> _Subscriptions = new();
+
+    /// <summary>
     /// 描画が完了するたびに呼び出されます (以降、ローカルストレージへのアクセスが可能になります)
     /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -75,7 +81,23 @@
             var components = await this.LocalStorage.GetItemAsync<ComponentDescriptor[]>("components");
             if (components != null) this._Components.AddRange(components);
             this.StateHasChanged();
+
+            // ブラウザのローカルストレージに保存しておいたドックマネージャーのレイアウト情報から、レイアウトを復元
+            var layout = await this.LocalStorage.GetItemAsStringAsync("layout");
+            if(!string.IsNullOrEmpty(layout)) await this.Helper.RestoreLayoutAsync("#dockmanager1", layout);
+
+            // ドックマネージャーが発行するイベントを購読
+            this._Subscriptions.Add(await this.Helper.SubscribeLayoutChangeEventAsync("#dockmanager1", OnLayoutChange));
         }
+    }
+
+    /// <summary>
+    /// ドックマネージャーのレイアウトが変更されたときに呼び出され、変更後のレイアウト情報をブラウザのローカルストレージに保存します。
+    /// </summary>
+    private async ValueTask OnLayoutChange(string? layout)
+    {
+        if (layout == null) return;
+        await this.LocalStorage.SetItemAsStringAsync("layout", layout);
     }
 
     /// <summary>
@@ -120,5 +142,14 @@
 
         // 表示コンポーネントの情報を、ブラウザのローカルストレージに保存
         await this.LocalStorage.SetItemAsync("components", this._Components);
+    }
+
+    /// <summary>
+    /// この App コンポーネントが破棄されるときに呼び出され、購読していたドックマネージャーのイベント購読を破棄します。
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        var valueTasks = this._Subscriptions.Select(subscription => subscription.DisposeAsync()).ToArray();
+        foreach (var valueTask in valueTasks) await valueTask;
     }
 }
