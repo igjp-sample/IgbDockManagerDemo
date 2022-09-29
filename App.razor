@@ -88,6 +88,7 @@
 
             // ドックマネージャーが発行するイベントを購読
             this._Subscriptions.Add(await this.Helper.SubscribeLayoutChangeEventAsync("#dockmanager1", OnLayoutChange));
+            this._Subscriptions.Add(await this.Helper.SubscribePaneCloseEventAsync("#dockmanager1", OnPaneClose));
         }
     }
 
@@ -98,6 +99,21 @@
     {
         if (layout == null) return;
         await this.LocalStorage.SetItemAsStringAsync("layout", layout);
+    }
+
+    /// <summary>
+    /// ドックマネージャーのペインが閉じられたときに呼び出され、閉じられたペインに表示していた表示コンポーネントを削除し、ブラウザのローカルストレージに保存します。
+    /// </summary>
+    private async ValueTask OnPaneClose(string[]? closedPaneIds)
+    {
+        var componentsToRemove = (closedPaneIds ?? Array.Empty<string>())
+            .Select(paneId => this._Components.Find(descriptor => descriptor.Id == paneId))
+            .Where(descriptor => descriptor != null)
+            .ToArray();
+        foreach (var descriptor in componentsToRemove) { this._Components.Remove(descriptor!); }
+
+        await LocalStorage.SetItemAsync("components", this._Components);
+        this.StateHasChanged();
     }
 
     /// <summary>
