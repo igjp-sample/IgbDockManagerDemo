@@ -4,7 +4,7 @@
 @inject ILocalStorageService LocalStorage
 @inject DockManagerHelper Helper
 
-<div class="container">
+<main class="container @(this._DisplayReady ? "ready" : "")">
 
     <!-- ドックマネージャー -->
     <IgbDockManager id="dockmanager1" Layout="this._InitialLayout" Width="800px" Height="400px">
@@ -31,7 +31,7 @@
             <IgbButton @onclick="OnClickAddTextMessage" Disabled="@(this._Message == "")">Add TextMessage</IgbButton>
         </div>
     </div>
-</div>
+</main>
 
 @code {
 
@@ -70,6 +70,8 @@
     /// </summary>
     private readonly List<IAsyncDisposable> _Subscriptions = new();
 
+    private bool _DisplayReady = false;
+
     /// <summary>
     /// 描画が完了するたびに呼び出されます (以降、ローカルストレージへのアクセスが可能になります)
     /// </summary>
@@ -89,6 +91,9 @@
             // ドックマネージャーが発行するイベントを購読
             this._Subscriptions.Add(await this.Helper.SubscribeLayoutChangeEventAsync("#dockmanager1", OnLayoutChange));
             this._Subscriptions.Add(await this.Helper.SubscribePaneCloseEventAsync("#dockmanager1", OnPaneClose));
+
+            this._DisplayReady = true;
+            this.StateHasChanged();
         }
     }
 

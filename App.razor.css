@@ -7,9 +7,18 @@
     align-items: center;
 }
 
-    .container [slot] {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
+main {
+    opacity: 0;
+    transition: opacity linear 0.2s;
+}
+
+    main.ready {
+        opacity: 1;
     }
+
+.container [slot] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
