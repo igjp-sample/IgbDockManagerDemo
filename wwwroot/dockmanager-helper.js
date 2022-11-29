@@ -3,7 +3,12 @@
 // However, the DockManager body element is hidden in the Shadow DOM as a child element of the element drawn with the Blazor component tag,
 // so it is retrieved by carefully traversing the DOM hierarchy.
 function getDockManagerInternal(dockManagerContainerSelector) {
-  const dockManager = document.querySelector(dockManagerContainerSelector)
+  const dockManagerContainer = document.querySelector(dockManagerContainerSelector);
+  const dockManager =
+    // for v.22.2
+    dockManagerContainer?.querySelector("igc-dockmanager") ||
+    // for v.22.1
+    dockManagerContainer
     ?.querySelector("igc-component-renderer-container")
     ?.shadowRoot
     ?.querySelector("igc-dockmanager");
