@@ -20,9 +20,28 @@ jobs:
       - name: Install .NET WebAssembly Tools
         run: dotnet workload install wasm-tools
 
+      # Setup NuGet package source
+      - name: Setup NuGet package source
+        run: dotnet nuget add source https://nuget.pkg.github.com/igjp-sample/index.json
+          --name igjp-sample
+          --username ${{ secrets.USER }}
+          --password ${{ secrets.PAT }}
+          --store-password-in-clear-text
+
+      # Replace NuGet package of Ignite UI for Blazor
+      - name: Remove the trial package
+        run: dotnet remove package IgniteUI.Blazor.Trial
+      - name: Add the licenced package
+        run: dotnet add package IgniteUI.Blazor --version 23.1.60
+        
+
       # Publish the site
       - name: Publish
         run: dotnet publish IgbDockManagerDemo.csproj -c Release -o publish -p GHPages=true
+
+      # Clean up package source
+      - name: Clean up package source
+        run: dotnet nuget remove source igjp-sample
 
       # Deploy the site
       - name: Deploy
