@@ -1,47 +1,49 @@
-﻿
-// Obtains the DockManager body element implemented in WebComponents.
-// However, the DockManager body element is hidden in the Shadow DOM as a child element of the element drawn with the Blazor component tag,
-// so it is retrieved by carefully traversing the DOM hierarchy.
-function getDockManagerInternal(dockManagerContainerSelector) {
+﻿/**
+ * Obtains the DockManager body element implemented in WebComponents.
+ * However, the DockManager body element is hidden in the Shadow DOM as a child element of the element drawn with the Blazor component tag,
+ * so it is retrieved by carefully traversing the DOM hierarchy.
+ * 
+ * @param {string} dockManagerContainerSelector
+ * @returns {HTMLElement & {layout:any} | null}
+ */
+const getDockManagerInternal = (dockManagerContainerSelector) => {
   const dockManagerContainer = document.querySelector(dockManagerContainerSelector);
   const dockManager =
-    // for v.22.2
+    // for v.22.2 or later
     dockManagerContainer?.querySelector("igc-dockmanager") ||
     // for v.22.1
     dockManagerContainer
-    ?.querySelector("igc-component-renderer-container")
-    ?.shadowRoot
-    ?.querySelector("igc-dockmanager");
+      ?.querySelector("igc-component-renderer-container")
+      ?.shadowRoot
+      ?.querySelector("igc-dockmanager");
   return dockManager || null;
 }
 
-// Ensure the DockManagerf instance is ready.
-function getDockManager(dockManagerContainerSelector) {
+/**
+ * Ensure the DockManagerf instance is ready.
+ * 
+ * @param {string} dockManagerContainerSelector
+ * @returns {HTMLElement & {layout:any}}
+ */
+const getDockManager = async (dockManagerContainerSelector) => {
 
-  return new Promise((resolve, reject) => {
+  const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+  for (let i = 0; i < 500; i++) {
     const dockManager = getDockManagerInternal(dockManagerContainerSelector);
-    if (dockManager !== null) {
-      resolve(dockManager);
-    }
-    else {
-      let counter = 0;
-      const timerId = setInterval(() => {
-        counter++;
-        const dockManager = getDockManagerInternal(dockManagerContainerSelector);
-        if (dockManager !== null) {
-          clearInterval(timerId);
-          resolve(dockManager);
-        }
-        else if (counter > (5000 / 10)) {
-          clearInterval(timerId);
-          reject();
-        }
-      }, 10)
-    }
-  });
+    if (dockManager !== null) return dockManager;
+    await delay(10);
+  }
+  throw new Error(`Dock Manager could not found: selecter = "${dockManagerContainerSelector}"`);
 }
 
-export async function attachContentPane(dockManagerContainerSelector, contentId, header) {
+/**
+ * Attaches a content pane to the DockManager.
+ * @param {string} dockManagerContainerSelector
+ * @param {string} contentId
+ * @param {string} header
+ */
+export const attachContentPane = async (dockManagerContainerSelector, contentId, header) => {
 
   const dockManager = await getDockManager(dockManagerContainerSelector);
 
@@ -65,7 +67,12 @@ export async function attachContentPane(dockManagerContainerSelector, contentId,
   dockManager.layout = { ...dockManager.layout };
 }
 
-export async function restoreLayout(dockManagerContainerSelector, layout) {
+/**
+ * Restore the layout of the DockManager
+ * @param {string} dockManagerContainerSelector
+ * @param {any} layout
+ */
+export const restoreLayout = async (dockManagerContainerSelector, layout) => {
   const dockManager = await getDockManager(dockManagerContainerSelector);
   dockManager.layout = JSON.parse(layout);
 }
