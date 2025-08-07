@@ -1,0 +1,25 @@
+/* /App.razor.rz.scp.css */
+.container[b-qosvkbjs93] {
+    margin-top: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+main[b-qosvkbjs93] {
+    opacity: 0;
+    transition: opacity linear 0.2s;
+}
+
+    main.ready[b-qosvkbjs93] {
+        opacity: 1;
+    }
+
+.container [slot][b-qosvkbjs93] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
